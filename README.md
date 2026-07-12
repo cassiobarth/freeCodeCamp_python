@@ -1,2 +1,2 @@
 # freeCodeCamp_python
-code of workshops and labs from FCC Python Certificate
+This repository is made for fun and is based on freeCodeCamp Python Certificate exercises and projects.
