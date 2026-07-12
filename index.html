@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Extrator de PIN — freeCodeCamp Python</title>
+  <title>Labs Python — freeCodeCamp</title>
 
   <!-- PyScript (roda Python no navegador via WebAssembly) -->
   <link rel="stylesheet" href="https://pyscript.net/releases/2024.11.1/core.css">
@@ -41,8 +41,8 @@
 
     .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 0; flex-wrap: wrap; }
     .tab-btn {
-      background: none; border: none; padding: 10px 16px; cursor: pointer;
-      font-size: 0.95rem; font-weight: 600; color: var(--muted);
+      background: none; border: none; padding: 10px 14px; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600; color: var(--muted);
       border-bottom: 3px solid transparent; margin-bottom: -2px;
       font-family: inherit;
     }
@@ -56,11 +56,13 @@
     .panel.active { display: block; }
 
     label { display: block; font-weight: 600; margin-bottom: 6px; }
-    textarea {
-      width: 100%; min-height: 160px; padding: 10px; border-radius: 6px;
+    textarea, input.num {
+      width: 100%; padding: 10px; border-radius: 6px;
       border: 1px solid var(--border); background: var(--bg); color: var(--text);
-      font-family: "Courier New", monospace; font-size: 0.95rem; resize: vertical;
+      font-family: "Courier New", monospace; font-size: 0.95rem;
     }
+    textarea { min-height: 160px; resize: vertical; }
+    input.num { max-width: 160px; }
     button.action {
       margin-top: 12px; padding: 10px 20px; border: none; border-radius: 6px;
       background: var(--accent); color: #fff; font-weight: 700; cursor: pointer;
@@ -78,30 +80,33 @@
       overflow-x: auto; white-space: pre-wrap;
     }
     .green { color: var(--green); font-weight: 700; }
+    .hint { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
 
     /* Código Explicado */
     .explain { font-family: "Courier New", monospace; font-size: 0.9rem; line-height: 1.5; }
-    .explain .code { color: var(--code); font-weight: 700; white-space: pre; }
+    .explain .code { color: var(--code); font-weight: 700; white-space: pre; overflow-x: auto; }
     .explain .desc {
       color: var(--muted); font-style: italic; font-family: "Segoe UI", sans-serif;
       margin: 2px 0 14px 24px; font-size: 0.88rem;
     }
 
     .loading { color: var(--muted); font-style: italic; }
-    py-splashscreen { display: none; } /* usamos nosso próprio texto de carregamento */
+    py-splashscreen { display: none; }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>🔐 Extrator de PIN</h1>
-      <p>Lab da certificação <strong>freeCodeCamp — Python</strong>. Roda Python de verdade no seu navegador (PyScript).</p>
+      <h1>🐍 Labs Python — freeCodeCamp</h1>
+      <p>Exercícios da certificação <strong>Python</strong> rodando de verdade no navegador (PyScript).</p>
     </header>
 
     <div class="tabs">
-      <button class="tab-btn active" data-tab="teste">Teste seu Poema</button>
-      <button class="tab-btn" data-tab="original">Exercício Original</button>
-      <button class="tab-btn" data-tab="codigo">Código Explicado</button>
+      <button class="tab-btn active" data-tab="teste">🔐 Teste PIN</button>
+      <button class="tab-btn" data-tab="original">🔐 Exercício</button>
+      <button class="tab-btn" data-tab="codigo">🔐 Código</button>
+      <button class="tab-btn" data-tab="padrao">🔢 Padrão</button>
+      <button class="tab-btn" data-tab="codigo-padrao">🔢 Código</button>
     </div>
 
     <!-- Aba 1: Teste seu Poema -->
@@ -110,6 +115,7 @@
       <textarea id="user-poem" placeholder="Stars and the moon&#10;shine in the sky&#10;white and&#10;until the end of the night"></textarea>
       <button id="extract-btn" class="action">Extrair PIN</button>
       <div id="user-result" class="result loading">Carregando Python… aguarde alguns segundos.</div>
+      <p class="hint">Cada dígito do PIN é o tamanho da palavra na posição igual ao número da linha (0, 1, 2, …), ou 0 se não existir.</p>
     </section>
 
     <!-- Aba 2: Exercício Original -->
@@ -119,14 +125,29 @@
       <div class="result"><span id="original-result" class="green loading">Carregando…</span></div>
     </section>
 
-    <!-- Aba 3: Código Explicado -->
+    <!-- Aba 3: Código do PIN Explicado -->
     <section id="codigo" class="panel">
-      <label>Como o código funciona, linha a linha:</label>
-      <div class="explain" id="explain"></div>
+      <label>Como o extrator de PIN funciona, linha a linha:</label>
+      <div class="explain" id="explain-pin"></div>
+    </section>
+
+    <!-- Aba 4: Padrão de Números (interativo) -->
+    <section id="padrao" class="panel">
+      <label for="pattern-n">Digite um número (n):</label>
+      <input id="pattern-n" class="num" type="number" min="1" value="5">
+      <button id="pattern-btn" class="action">Gerar Padrão</button>
+      <div id="pattern-result" class="result loading">Carregando Python…</div>
+      <p class="hint">Gera a sequência de <code>1</code> até <code>n</code>. Aceita só inteiros maiores que 0 — teste digitar algo inválido!</p>
+    </section>
+
+    <!-- Aba 5: Código do Padrão Explicado -->
+    <section id="codigo-padrao" class="panel">
+      <label>Como o gerador de padrão funciona, linha a linha:</label>
+      <div class="explain" id="explain-pattern"></div>
     </section>
   </div>
 
-  <!-- Troca de abas (JavaScript puro) -->
+  <!-- Troca de abas + explicações estáticas (JavaScript puro) -->
   <script>
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -137,8 +158,21 @@
       });
     });
 
-    // Aba "Código Explicado": conteúdo estático (não precisa de Python)
-    const CODE_EXPLANATION = [
+    function renderExplanation(targetId, rows) {
+      const el = document.getElementById(targetId);
+      for (const [indent, code, desc] of rows) {
+        const c = document.createElement("div");
+        c.className = "code";
+        c.textContent = "    ".repeat(indent) + code;
+        const d = document.createElement("div");
+        d.className = "desc";
+        d.textContent = "→ " + desc;
+        el.appendChild(c);
+        el.appendChild(d);
+      }
+    }
+
+    renderExplanation("explain-pin", [
       [0, "def pin_extractor(poems):", "Define a função. 'poems' é uma lista de poemas (strings)."],
       [1, "secret_codes = []", "Cria uma lista vazia que vai guardar o PIN de cada poema."],
       [1, "for poem in poems:", "Percorre cada poema, um de cada vez."],
@@ -152,24 +186,26 @@
       [4, "secret_code += '0'", "…usa o dígito '0' no lugar."],
       [2, "secret_codes.append(secret_code)", "Guarda o PIN completo deste poema na lista de resultados."],
       [1, "return secret_codes", "Devolve a lista com o PIN de todos os poemas."],
-    ];
-    const explainEl = document.getElementById("explain");
-    for (const [indent, code, desc] of CODE_EXPLANATION) {
-      const c = document.createElement("div");
-      c.className = "code";
-      c.textContent = "    ".repeat(indent) + code;
-      const d = document.createElement("div");
-      d.className = "desc";
-      d.textContent = "→ " + desc;
-      explainEl.appendChild(c);
-      explainEl.appendChild(d);
-    }
+    ]);
+
+    renderExplanation("explain-pattern", [
+      [0, "def number_pattern(n):", "Define a função que recebe um número n."],
+      [1, "if type(n) is not int:", "Verifica se n NÃO é um número inteiro."],
+      [2, 'return "Argument must be an integer value."', "Se não for inteiro, devolve essa mensagem de erro e para."],
+      [1, "if n < 1:", "Verifica se n é menor que 1."],
+      [2, 'return "Argument must be an integer greater than 0."', "Se for, devolve outra mensagem de erro e para."],
+      [1, 'pattern = ""', "Cria uma string vazia para montar o resultado."],
+      [1, "for i in range(1, n + 1):", "Percorre os números de 1 até n (inclusive)."],
+      [2, 'pattern += str(i) + " "', "Adiciona cada número seguido de um espaço."],
+      [1, "return pattern.strip()", 'Remove o espaço final e devolve "1 2 3 … n".'],
+    ]);
   </script>
 
   <!-- Lógica em Python real, rodando no navegador -->
   <script type="py">
 from pyscript import when, document
 
+# ---------- Lab 1: Extrator de PIN ----------
 def pin_extractor(poems):
     """Extrai um código secreto (PIN) de uma lista de poemas."""
     secret_codes = []
@@ -186,7 +222,6 @@ def pin_extractor(poems):
     return secret_codes
 
 
-# Poemas originais do exercício
 poem1 = """Stars and the moon
 shine in the sky
 white and
@@ -208,7 +243,32 @@ def extract(event):
     result.innerText = f"PIN Extraído: {pin}"
 
 
-# Preenche a aba do exercício original assim que o Python carrega
+# ---------- Lab 2: Gerador de Padrão de Números ----------
+def number_pattern(n):
+    if type(n) is not int:
+        return "Argument must be an integer value."
+    if n < 1:
+        return "Argument must be an integer greater than 0."
+    pattern = ""
+    for i in range(1, n + 1):
+        pattern += str(i) + " "
+    return pattern.strip()
+
+
+@when("click", "#pattern-btn")
+def gen_pattern(event):
+    raw = document.querySelector("#pattern-n").value.strip()
+    result = document.querySelector("#pattern-result")
+    result.classList.remove("loading")
+    # Converte para int se possível; senão passa a string para acionar a validação da função
+    try:
+        n = int(raw)
+    except ValueError:
+        n = raw  # a função vai retornar "Argument must be an integer value."
+    result.innerText = number_pattern(n)
+
+
+# ---------- Inicialização ao carregar o Python ----------
 _display = "\n\n".join(
     f"--- Poema {i} ---\n{p}" for i, p in enumerate([poem1, poem2, poem3], start=1)
 )
@@ -218,10 +278,13 @@ _orig = document.querySelector("#original-result")
 _orig.classList.remove("loading")
 _orig.innerText = f"PINs Extraídos: {pin_extractor(original_poems)}"
 
-# Libera a aba de teste
 _ur = document.querySelector("#user-result")
 _ur.classList.remove("loading")
 _ur.innerText = "Pronto! Digite um poema e clique em Extrair PIN."
+
+_pr = document.querySelector("#pattern-result")
+_pr.classList.remove("loading")
+_pr.innerText = number_pattern(5)
   </script>
 </body>
 </html>

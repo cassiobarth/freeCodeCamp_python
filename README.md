@@ -2,7 +2,13 @@
 
 Code from the workshops and labs of the [freeCodeCamp](https://www.freecodecamp.org/) **Scientific Computing with Python** certification.
 
-A collection of small Python exercises exploring core language features — list comprehensions, `filter`, string manipulation — plus a Tkinter GUI that turns one of the labs into an interactive app.
+A collection of small Python exercises exploring core language features — list comprehensions, `filter`, string manipulation — plus a Tkinter GUI and a web version that turn the labs into interactive apps.
+
+## 🔗 Live Demo
+
+**Try it in your browser (no install):** https://cassiobarth.github.io/freeCodeCamp_python/
+
+The labs run as real Python in the browser via [PyScript](https://pyscript.net/) — with an interactive PIN extractor, a number-pattern generator, and a line-by-line explanation of each program.
 
 ## Contents
 
@@ -11,6 +17,8 @@ A collection of small Python exercises exploring core language features — list
 | [`loops.py`](loops.py) | List comprehensions and `filter()` exercises — even numbers, mapping values, conditional expressions, and filtering lists. |
 | [`pin_extractor.py`](pin_extractor.py) | "Secret code" lab: reads a set of poems and builds a PIN from the word lengths at each line. |
 | [`pin_extractor_gui.py`](pin_extractor_gui.py) | A Tkinter desktop app wrapping the PIN extractor — type your own poem and extract its PIN interactively. |
+| [`number_pattern.py`](number_pattern.py) | "Number Pattern Generator" lab: returns the sequence `1 2 3 … n`, with validation that `n` is an integer greater than 0. |
+| [`index.html`](index.html) | Web version of the labs (PyScript) powering the live demo above. |
 
 ## Requirements
 
