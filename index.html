@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extrator de PIN — freeCodeCamp Python</title>
+
+  <!-- PyScript (roda Python no navegador via WebAssembly) -->
+  <link rel="stylesheet" href="https://pyscript.net/releases/2024.11.1/core.css">
+  <script type="module" src="https://pyscript.net/releases/2024.11.1/core.js"></script>
+
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --border: #d9dde3;
+      --text: #1f2328;
+      --muted: #6b7280;
+      --accent: #0b5394;
+      --accent-soft: #e8f0fb;
+      --code: #0b5394;
+      --green: #157347;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1117; --card: #161b22; --border: #30363d;
+        --text: #e6edf3; --muted: #9198a1; --accent: #58a6ff;
+        --accent-soft: #17324d; --code: #79c0ff; --green: #3fb950;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px 16px;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg); color: var(--text);
+      display: flex; justify-content: center;
+    }
+    .app { width: 100%; max-width: 640px; }
+    header h1 { margin: 0 0 4px; font-size: 1.5rem; }
+    header p { margin: 0 0 20px; color: var(--muted); font-size: 0.95rem; }
+
+    .tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 0; flex-wrap: wrap; }
+    .tab-btn {
+      background: none; border: none; padding: 10px 16px; cursor: pointer;
+      font-size: 0.95rem; font-weight: 600; color: var(--muted);
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      font-family: inherit;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .panel {
+      display: none; background: var(--card); border: 1px solid var(--border);
+      border-top: none; border-radius: 0 0 8px 8px; padding: 20px;
+    }
+    .panel.active { display: block; }
+
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    textarea {
+      width: 100%; min-height: 160px; padding: 10px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text);
+      font-family: "Courier New", monospace; font-size: 0.95rem; resize: vertical;
+    }
+    button.action {
+      margin-top: 12px; padding: 10px 20px; border: none; border-radius: 6px;
+      background: var(--accent); color: #fff; font-weight: 700; cursor: pointer;
+      font-size: 0.95rem; font-family: inherit;
+    }
+    button.action:hover { filter: brightness(1.08); }
+    .result {
+      margin-top: 16px; padding: 12px 14px; border-radius: 6px;
+      background: var(--accent-soft); font-weight: 700; color: var(--accent);
+      min-height: 1.2em; word-break: break-all;
+    }
+    pre.poem {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px; font-family: "Courier New", monospace; font-size: 0.9rem;
+      overflow-x: auto; white-space: pre-wrap;
+    }
+    .green { color: var(--green); font-weight: 700; }
+
+    /* Código Explicado */
+    .explain { font-family: "Courier New", monospace; font-size: 0.9rem; line-height: 1.5; }
+    .explain .code { color: var(--code); font-weight: 700; white-space: pre; }
+    .explain .desc {
+      color: var(--muted); font-style: italic; font-family: "Segoe UI", sans-serif;
+      margin: 2px 0 14px 24px; font-size: 0.88rem;
+    }
+
+    .loading { color: var(--muted); font-style: italic; }
+    py-splashscreen { display: none; } /* usamos nosso próprio texto de carregamento */
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🔐 Extrator de PIN</h1>
+      <p>Lab da certificação <strong>freeCodeCamp — Python</strong>. Roda Python de verdade no seu navegador (PyScript).</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="teste">Teste seu Poema</button>
+      <button class="tab-btn" data-tab="original">Exercício Original</button>
+      <button class="tab-btn" data-tab="codigo">Código Explicado</button>
+    </div>
+
+    <!-- Aba 1: Teste seu Poema -->
+    <section id="teste" class="panel active">
+      <label for="user-poem">Digite seu poema aqui:</label>
+      <textarea id="user-poem" placeholder="Stars and the moon&#10;shine in the sky&#10;white and&#10;until the end of the night"></textarea>
+      <button id="extract-btn" class="action">Extrair PIN</button>
+      <div id="user-result" class="result loading">Carregando Python… aguarde alguns segundos.</div>
+    </section>
+
+    <!-- Aba 2: Exercício Original -->
+    <section id="original" class="panel">
+      <label>Poemas originais do exercício:</label>
+      <pre class="poem" id="original-poems"></pre>
+      <div class="result"><span id="original-result" class="green loading">Carregando…</span></div>
+    </section>
+
+    <!-- Aba 3: Código Explicado -->
+    <section id="codigo" class="panel">
+      <label>Como o código funciona, linha a linha:</label>
+      <div class="explain" id="explain"></div>
+    </section>
+  </div>
+
+  <!-- Troca de abas (JavaScript puro) -->
+  <script>
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+      });
+    });
+
+    // Aba "Código Explicado": conteúdo estático (não precisa de Python)
+    const CODE_EXPLANATION = [
+      [0, "def pin_extractor(poems):", "Define a função. 'poems' é uma lista de poemas (strings)."],
+      [1, "secret_codes = []", "Cria uma lista vazia que vai guardar o PIN de cada poema."],
+      [1, "for poem in poems:", "Percorre cada poema, um de cada vez."],
+      [2, "secret_code = ''", "Começa uma string vazia para montar o PIN deste poema."],
+      [2, "lines = poem.strip().split('\\n')", "Remove espaços das pontas e quebra o poema em uma lista de linhas."],
+      [2, "for line_index, line in enumerate(lines):", "Percorre cada linha guardando também seu número (0, 1, 2, …)."],
+      [3, "words = line.split()", "Divide a linha em uma lista de palavras."],
+      [3, "if len(words) > line_index:", "Verifica se existe uma palavra na posição igual ao número da linha."],
+      [4, "secret_code += str(len(words[line_index]))", "Se existe: pega essa palavra, mede seu tamanho e junta ao PIN."],
+      [3, "else:", "Caso contrário (a linha é curta demais)…"],
+      [4, "secret_code += '0'", "…usa o dígito '0' no lugar."],
+      [2, "secret_codes.append(secret_code)", "Guarda o PIN completo deste poema na lista de resultados."],
+      [1, "return secret_codes", "Devolve a lista com o PIN de todos os poemas."],
+    ];
+    const explainEl = document.getElementById("explain");
+    for (const [indent, code, desc] of CODE_EXPLANATION) {
+      const c = document.createElement("div");
+      c.className = "code";
+      c.textContent = "    ".repeat(indent) + code;
+      const d = document.createElement("div");
+      d.className = "desc";
+      d.textContent = "→ " + desc;
+      explainEl.appendChild(c);
+      explainEl.appendChild(d);
+    }
+  </script>
+
+  <!-- Lógica em Python real, rodando no navegador -->
+  <script type="py">
+from pyscript import when, document
+
+def pin_extractor(poems):
+    """Extrai um código secreto (PIN) de uma lista de poemas."""
+    secret_codes = []
+    for poem in poems:
+        secret_code = ''
+        lines = poem.strip().split('\n')
+        for line_index, line in enumerate(lines):
+            words = line.split()
+            if len(words) > line_index:
+                secret_code += str(len(words[line_index]))
+            else:
+                secret_code += '0'
+        secret_codes.append(secret_code)
+    return secret_codes
+
+
+# Poemas originais do exercício
+poem1 = """Stars and the moon
+shine in the sky
+white and
+until the end of the night"""
+poem2 = 'The grass is green\nhere and there\nhoping for rain\nbefore it turns yellow'
+poem3 = 'There\nonce\nwas\na\ndragon'
+original_poems = [poem1, poem2, poem3]
+
+
+@when("click", "#extract-btn")
+def extract(event):
+    text = document.querySelector("#user-poem").value
+    result = document.querySelector("#user-result")
+    result.classList.remove("loading")
+    if not text.strip():
+        result.innerText = "Por favor, insira um poema."
+        return
+    pin = pin_extractor([text])[0]
+    result.innerText = f"PIN Extraído: {pin}"
+
+
+# Preenche a aba do exercício original assim que o Python carrega
+_display = "\n\n".join(
+    f"--- Poema {i} ---\n{p}" for i, p in enumerate([poem1, poem2, poem3], start=1)
+)
+document.querySelector("#original-poems").innerText = _display
+
+_orig = document.querySelector("#original-result")
+_orig.classList.remove("loading")
+_orig.innerText = f"PINs Extraídos: {pin_extractor(original_poems)}"
+
+# Libera a aba de teste
+_ur = document.querySelector("#user-result")
+_ur.classList.remove("loading")
+_ur.innerText = "Pronto! Digite um poema e clique em Extrair PIN."
+  </script>
+</body>
+</html>
