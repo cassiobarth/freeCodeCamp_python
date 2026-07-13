@@ -1,5 +1,9 @@
 # freeCodeCamp — Python Certification
 
+[![Live Demo](https://img.shields.io/badge/🟢_Live_Demo-Open_App-2ea44f?style=for-the-badge)](https://cassiobarth.github.io/freeCodeCamp_python/)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![PyScript](https://img.shields.io/badge/PyScript-WebAssembly-FFD43B?style=for-the-badge)](https://pyscript.net/)
+
 Code from the workshops and labs of the [freeCodeCamp](https://www.freecodecamp.org/) **Scientific Computing with Python** certification.
 
 A collection of small Python exercises exploring core language features — list comprehensions, `filter`, string manipulation — plus a Tkinter GUI and a web version that turn the labs into interactive apps.
