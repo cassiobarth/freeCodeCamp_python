@@ -40,3 +40,7 @@ def is_not_samsung(tv):
 
 televisoes_nao_samsung = list(filter(is_not_samsung, televisoes))
 print(televisoes_nao_samsung) # ['LG', 'Sony', 'Panasonic', 'Philips']
+
+
+developer = 'Jessica'
+print(list(developer))
